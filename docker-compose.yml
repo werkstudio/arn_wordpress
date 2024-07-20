@@ -18,9 +18,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-
     volumes:
       - ./data/wordpress:/var/www/html
+    networks:
+      - arn-network
 
   mariadb:
     container_name: arn-maridb
@@ -39,12 +40,20 @@ services:
       retries: 3
     volumes:
       - ./data/mysql:/var/lib/mysql
+    networks:
+      - arn-network
 
   redis:
     container_name: arn-redis
     image: redis:latest
     restart: always
+    networks:
+      arn-network:
+        ipv4_address: 172.16.238.10
 
 networks:
-  default:
-    name: arn-app-network
+  arn-network:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.16.238.0/24"
