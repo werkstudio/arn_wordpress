@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+
+  wordpress:
+    container_name: arn-wordpress
+    image: wordpress:latest
+    restart: always
+    ports:
+      - 8081:80
+    environment:
+      - WORDPRESS_DB_HOST=mariadb
+      - WORDPRESS_DB_NAME=arnDB
+      - WORDPRESS_DB_USER=arnUser
+      - WORDPRESS_DB_PASSWORD=arnSecret2024
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+    volumes:
+      - ./data/wordpress:/var/www/html
+
+  mariadb:
+    container_name: arn-maridb
+    image: mariadb:lts
+    restart: always
+    environment:
+      - MARIADB_DATABASE=arnDB
+      - MARIADB_USER=arnUser
+      - MARIADB_PASSWORD=arnSecret2024
+      - MARIADB_RANDOM_ROOT_PASSWORD=1
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+
+  redis:
+    container_name: arn-redis
+    image: redis:latest
+    restart: always
+
+networks:
+  default:
+    name: arn-app-network
