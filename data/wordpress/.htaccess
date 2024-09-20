@@ -1,0 +1,40 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    
+    # Handle authorization headers
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+    
+    # Redirect to index.php if the file or directory does not exist
+    RewriteRule ^index\.php$ - [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . /index.php [L]
+    
+    # Block file enumeration for sensitive files except wp-login.php
+    RewriteCond %{REQUEST_URI} ^.*(wp\-content|wp\-includes|wp\-admin|wp\-json)\.php$
+    RewriteCond %{REMOTE_ADDR} !^111\.223\.252\.
+    RewriteRule ^.*$ - [F,L]
+</IfModule>
+
+# Disable directory listing
+Options -Indexes
+
+# Block access to sensitive WordPress core files
+<FilesMatch "(^wp-config\.php|^xmlrpc\.php)">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Restrict access to wp-login.php to a specific IP
+<Files wp-login.php>
+    Order Deny,Allow
+    Deny from all
+    Allow from 111.223.252.0/24
+</Files>
+
+# PHP configuration settings
+php_value upload_max_filesize 256M
+php_value post_max_size 256M
+php_value max_execution_time 300
+php_value max_input_time 300
