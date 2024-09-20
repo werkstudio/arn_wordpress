@@ -20,6 +20,10 @@ services:
         condition: service_started
     volumes:
       - ./data/wordpress:/var/www/html
+      - ./config/custom-php.ini:/usr/local/etc/php/conf.d/custom-php.ini
+      - ./config/apache-custom.conf:/etc/apache2/conf-enabled/apache-custom.conf
+      - ./config/security.conf:/etc/apache2/conf-enabled/security.conf
+
     networks:
       - arn-network
 
